@@ -1,56 +1,66 @@
 import requests
+import pandas as pd
+import streamlit as st
 
-# CoinGecko API
-url = "https://api.coingecko.com/api/v3/simple/price"
+st.set_page_config(page_title="KryptoRadar AI", layout="wide")
 
-coins = [
-    "bitcoin",
-    "ethereum",
-    "ripple",
-    "solana",
-    "cardano",
-    "dogecoin",
-    "polkadot",
-    "chainlink",
-    "litecoin"
-]
+st.title("🚀 KryptoRadar AI")
+
+url = "https://api.coingecko.com/api/v3/coins/markets"
 
 params = {
-    "ids": ",".join(coins),
-    "vs_currencies": "nok",
-    "include_24hr_change": "true"
+    "vs_currency": "nok",
+    "order": "market_cap_desc",
+    "per_page": 20,
+    "page": 1,
+    "sparkline": False
 }
 
 response = requests.get(url, params=params)
-data = response.json()
+coins = response.json()
 
-
-def vurder_coin(change):
-    if change >= 5:
-        return "🚀 Sterkt kjøpssignal"
-
-    elif change >= 2:
-        return "🟢 Positiv trend"
-
-    elif change >= 0:
-        return "✅ Svak oppgang"
-
-    elif change >= -2:
-        return "⚠️ Følg med"
-
-    else:
-        return "🔴 Negativ trend"
-
-
-print("\n=== KryptoRadar AI ===\n")
+data = []
 
 for coin in coins:
+    data.append({
+        "Coin": coin["name"],
+        "Symbol": coin["symbol"].upper(),
+        "Pris (NOK)": round(coin["current_price"], 2),
+        "24t %": round(coin["price_change_percentage_24h"], 2)
+    })
 
-    pris = data.get(coin, {}).get("nok")
-    endring = data.get(coin, {}).get("nok_24h_change")
+df = pd.DataFrame(data)
 
-    print(f"{coin.upper()}")
-    print(f"Pris: {pris:,.0f} NOK")
-    print(f"24t endring: {endring:.2f}%")
-    print(f"AI vurdering: {vurder_coin(endring)}")
-    print("-" * 30)
+st.subheader("Top 20 kryptovalutaer")
+
+st.dataframe(
+    df.sort_values("24t %", ascending=False),
+    use_container_width='stretch'
+)
+
+st.subheader("🏆 Dagens vinnere")
+
+vinnere = df.sort_values("24t %", ascending=False).head(3)
+
+for _, row in vinnere.iterrows():
+    st.success(
+        f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
+    )
+
+st.subheader("💀 Dagens tapere")
+
+tapere = df.sort_values("24t %", ascending=True).head(3)
+
+for _, row in tapere.iterrows():
+    st.error(
+        f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
+    )   
+
+st.subheader("📊 Dagen populære")
+
+populære = df.sort_values("24t %", ascending=False).head(3)
+
+for _, row in populære.iterrows():
+    st.info(
+        f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
+    )
