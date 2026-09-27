@@ -33,33 +33,34 @@ df = pd.DataFrame(data)
 
 st.subheader("Top 20 kryptovalutaer")
 
-st.dataframe(
-    df.sort_values("24t %", ascending=False),
-    use_container_width='stretch'
+selected_coin = st.selectbox(
+    "Velg kryptovaluta",
+    df["Coin"]
 )
 
-# SIDEPANEL
+st.dataframe(
+    df.sort_values("24t %", ascending=False),
+    width="stretch"
+)
 
-st.sidebar.title("📊 Markedsoversikt")
+coin_info = df[df["Coin"] == selected_coin].iloc[0]
 
-st.sidebar.subheader("🏆 Dagens vinnere")
+st.divider()
 
-vinnere = df.sort_values("24t %", ascending=False).head(3)
+st.subheader(f"📈 {selected_coin}")
 
-for _, row in vinnere.iterrows():
-    st.sidebar.success(
-        f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
+col1, col2 = st.columns(2)
+
+with col1:
+    st.metric(
+        "Pris (NOK)",
+        f"{coin_info['Pris (NOK)']:,.2f}"
     )
 
-
-
-st.sidebar.subheader("💀 Dagens tapere")
-
-tapere = df.sort_values("24t %", ascending=True).head(3)
-
-for _, row in tapere.iterrows():
-    st.sidebar.error(
-        f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
+with col2:
+    st.metric(
+        "24t Endring",
+        f"{coin_info['24t %']}%"
     )
 
 
