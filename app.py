@@ -38,29 +38,41 @@ st.dataframe(
     use_container_width='stretch'
 )
 
-st.subheader("🏆 Dagens vinnere")
+# SIDEPANEL
+
+st.sidebar.title("📊 Markedsoversikt")
+
+st.sidebar.subheader("🏆 Dagens vinnere")
 
 vinnere = df.sort_values("24t %", ascending=False).head(3)
 
 for _, row in vinnere.iterrows():
-    st.success(
+    st.sidebar.success(
         f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
     )
 
-st.subheader("💀 Dagens tapere")
+
+
+st.sidebar.subheader("💀 Dagens tapere")
 
 tapere = df.sort_values("24t %", ascending=True).head(3)
 
 for _, row in tapere.iterrows():
-    st.error(
+    st.sidebar.error(
         f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
-    )   
+    )
 
-st.subheader("📊 Dagen populære")
 
-populære = df.sort_values("24t %", ascending=False).head(3)
+
+st.sidebar.subheader("⭐ Populære")
+
+populære = df[df["Coin"].isin([
+    "Bitcoin",
+    "Ethereum",
+    "Ripple"
+])]
 
 for _, row in populære.iterrows():
-    st.info(
+    st.sidebar.info(
         f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
     )
