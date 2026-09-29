@@ -49,6 +49,34 @@ st.divider()
 
 st.subheader(f"📈 {selected_coin}")
 
+st.subheader("🎯 Mine prisområder")
+
+kjop_nedre = st.number_input(
+    "Kjøpsområde fra",
+    min_value=0.0,
+    value=0.0
+)
+
+kjop_ovre = st.number_input(
+    "Kjøpsområde til",
+    min_value=0.0,
+    value=0.0
+)
+
+salg_nedre = st.number_input(
+    "Salgsområde fra",
+    min_value=0.0,
+    value=0.0
+)
+
+salg_ovre = st.number_input(
+    "Salgsområde til",
+    min_value=0.0,
+    value=0.0
+)
+
+st.divider()
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -63,7 +91,43 @@ with col2:
         f"{coin_info['24t %']}%"
     )
 
+pris = coin_info["Pris (NOK)"]
 
+if kjop_nedre <= pris <= kjop_ovre:
+    st.success(
+        "🟢 Kursen ligger innenfor kjøpsområdet ditt"
+    )
+
+elif salg_nedre <= pris <= salg_ovre:
+    st.warning(
+        "🔴 Kursen ligger innenfor salgsområdet ditt"
+    )
+
+else:
+    st.info(
+        "⚪ Kursen ligger utenfor områdene dine"
+    )
+
+st.sidebar.title("📊 Markedsoversikt")
+
+st.sidebar.subheader("🏆 Dagens vinnere")
+
+vinnere = df.sort_values("24t %", ascending=False).head(3)
+
+for _, row in vinnere.iterrows():
+    st.sidebar.success(
+        f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
+    )
+
+
+st.sidebar.subheader("💀 Dagens tapere")
+
+tapere = df.sort_values("24t %", ascending=True).head(3)
+
+for _, row in tapere.iterrows():
+    st.sidebar.error(
+        f"{row['Coin']} ({row['Symbol']}) : {row['24t %']}%"
+    )
 
 st.sidebar.subheader("⭐ Populære")
 
